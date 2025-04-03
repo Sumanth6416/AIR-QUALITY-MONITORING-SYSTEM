@@ -1,52 +1,66 @@
-# Prerequisites
-*.d
 
-# Object files
-*.o
-*.ko
-*.obj
-*.elf
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+#include <DHT.h>
 
-# Linker output
-*.ilk
-*.map
-*.exp
+#define DHTPIN 2         // Pin where the DHT11 sensor is connected
+#define DHTTYPE DHT11    // DHT11 sensor type
 
-# Precompiled Headers
-*.gch
-*.pch
+DHT dht(DHTPIN, DHTTYPE);  // Initialize the DHT sensor
 
-# Libraries
-*.lib
-*.a
-*.la
-*.lo
+// Set up LCD display
+LiquidCrystal_I2C lcd(0x27, 16, 2);  // LCD address 0x27 and 16x2 size
 
-# Shared objects (inc. Windows DLLs)
-*.dll
-*.so
-*.so.*
-*.dylib
+// Define MQ-135 sensor input pin
+int mq135Pin = A0;  // The analog pin where MQ-135 is connected
 
-# Executables
-*.exe
-*.out
-*.app
-*.i*86
-*.x86_64
-*.hex
+void setup() {
+  // Start the Serial Monitor for debugging
+  Serial.begin(9600);
+  
+  // Initialize DHT sensor
+  dht.begin();
+  
+  // Initialize LCD
+  lcd.begin(16, 2);
+  lcd.backlight();
+  
+  // Display a startup message on the LCD
+  lcd.setCursor(0, 0);
+  lcd.print("Air Quality");
+  lcd.setCursor(0, 1);
+  lcd.print("Monitoring");
+  delay(2000);
+}
 
-# Debug files
-*.dSYM/
-*.su
-*.idb
-*.pdb
+void loop() {
+  // Read the temperature and humidity from DHT11
+  float humidity = dht.readHumidity();
+  float temperature = dht.readTemperature();
+  
+  // Read the air quality value from MQ-135 (analog input)
+  int mq135Value = analogRead(mq135Pin);
+  
+  // Display data on Serial Monitor
+  Serial.print("Humidity: ");
+  Serial.print(humidity);
+  Serial.print("%  Temperature: ");
+  Serial.print(temperature);
+  Serial.print("C  Air Quality: ");
+  Serial.println(mq135Value);
+  
+  // Display data on LCD
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Temp: ");
+  lcd.print(temperature);
+  lcd.print(" C");
+  
+  lcd.setCursor(0, 1);
+  lcd.print("Air Quality: ");
+  lcd.print(mq135Value);
+  
+  // Add some delay before updating the data
+  delay(2000);
+}
 
-# Kernel Module Compile Results
-*.mod*
-*.cmd
-.tmp_versions/
-modules.order
-Module.symvers
-Mkfile.old
-dkms.conf
